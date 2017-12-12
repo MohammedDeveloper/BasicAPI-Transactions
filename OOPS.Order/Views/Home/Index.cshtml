@@ -1,0 +1,150 @@
+﻿
+
+<br />
+<div class="jumbotron">
+    <h1>Orders Info | <button id="getOrder" class="btn btn-lg btn-success">Get Orders</button></h1>
+    <hr />
+    <p>
+        <div id="appMessage" class="alert alert-success hidden">
+        </div>
+    </p>
+    <p>
+        <div id="ordersInfo">
+        </div>
+    </p>
+
+</div>
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        /// Base DOM functin
+        $(document).ready(function () {
+
+            /// add click event
+            document.getElementById("getOrder").addEventListener("click", GetOrders);
+        });
+
+        /// function to get orders
+        function GetOrders() {
+
+            /// set the order array
+            var ordersInfo = "";
+
+            /// AJAX call
+            $.ajax({
+                url: "/api/order/getorders",
+                type: "GET",
+                contentType: "application/json",
+                async: false,
+                success: function (res) {
+
+                    /// check
+                    if (null !== res && null !== res.orders) {
+
+                        /// loop the response
+                        $.each(res.orders, (value) => {
+
+                            /// set the order info
+                            ordersInfo += "<button data-action='billing' data-orderid='" + res.orders[value].Id + "' class='btn btn-sm btn-default pull-right handleAction'>Send to Billing</button>";
+                            ordersInfo += "<button data-action='cancel' data-orderid='" + res.orders[value].Id + "' class='btn btn-sm btn-warning pull-right handleAction'>Cancel Order</button>";
+                            ordersInfo += "<button data-action='addService' data-orderid='" + res.orders[value].Id + "' class='btn btn-sm btn-primary pull-right handleAction'>Add Service</button>";
+                            ordersInfo += "<br />";
+                            ordersInfo += "Order ID: " + res.orders[value].Id;
+                            ordersInfo += "<br />";
+                            ordersInfo += "Customer Name: " + res.orders[value].CustomerName;
+                            ordersInfo += "<br />";
+                            ordersInfo += "Account Number: " + res.orders[value].AccountNumber;
+                            ordersInfo += "<br />";
+                            ordersInfo += "Services: " + res.orders[value].Services.length;
+                            ordersInfo += "<br />";
+                            ordersInfo += "<hr />";
+                        });
+                    }
+
+                    /// set the ordersInfo
+                    document.getElementById("ordersInfo").innerHTML = ordersInfo;
+
+                    /// add the handler to handle all actions and perform actions...
+                    $(".handleAction").click(function (ev) {
+
+                        /// get the html attributes
+                        var orderId = $(this).attr("data-orderid");
+                        var action = $(this).attr("data-action");
+                        $("#appMessage").addClass("hidden");
+
+                        /// check
+                        if (orderId === undefined || orderId === null)
+                            return;
+
+                        /// switch the events based on click
+                        switch (action) {
+                            case "billing": {
+                                HandleAction(orderId, "billing", "Order Id " + orderId + " billing was successful");
+                                break;
+                            }
+                            case "cancel": {
+                                HandleAction(orderId, "CancelOrder", "Order Id " + orderId + " cancellation was successful");
+                                break;
+                            }
+                            case "addService": {
+                                HandleAction(orderId, "AddService", "Order Id " + orderId + " service addition was successful");
+                                break;
+                            }
+                        }
+
+                        /// alert the user on action
+                        //alert("Please view the console log");
+                    });
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+
+        /// function to Send To Billing
+        function HandleAction(orderId, apiName, message) {
+
+            /// set the ordersInfo
+            document.getElementById("appMessage").innerHTML = message;
+            $("#appMessage").toggleClass("hidden");
+            window.scrollTo(0, 0);
+
+            /// set the timeoout to hide
+            setTimeout(() => {
+
+                /// hide
+                $("#appMessage").toggleClass("hidden");
+            }, 2000);
+
+
+            /// AJAX call
+            //$.ajax({
+            //    url: "/api/order/" + apiName + "?orderId=" + parseInt(orderId),
+            //    type: "POST",
+            //    contentType: "application/json",
+            //    async: false,
+            //    success: function (res) {
+
+            //        /// set the ordersInfo
+            //        document.getElementById("appMessage").innerHTML = res.message;
+            //        $("#appMessage").toggleClass("hidden");
+
+            //        /// set the timeoout to hide
+            //        setTimeout(() => {
+
+            //            /// hide
+            //            $("#appMessage").toggleClass("hidden");
+            //        }, 2000);
+            //    },
+            //    error: function (xhr) {
+            //        console.log(xhr.responseText);
+            //    }
+            //});
+        }
+
+    </script>
+}
