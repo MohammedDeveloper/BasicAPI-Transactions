@@ -1,5 +1,5 @@
-# WebAPI-AJS-Application
-- Filtering results using Angular JS
+# WebAPI-MVC-Application
+- OOPS Concepts
 - ASP.NET MVC
 - Bootstrap
 - Bundling
